@@ -1,0 +1,30 @@
+import crypto from 'crypto';
+
+const scripts = new Map();
+
+export default function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { code } = req.body;
+  if (!code) {
+    return res.status(400).json({ error: 'No script provided' });
+  }
+
+  const hash = crypto.randomBytes(32).toString('hex');
+
+  scripts.set(hash, code);
+
+  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+  const host = req.headers.host;
+  const url = `\( {protocol}:// \){host}/api/script/${hash}`;
+  const loadstring = `loadstring(game:HttpGet("${url}"))()`;
+
+  res.status(200).json({
+    success: true,
+    hash,
+    url,
+    loadstring
+  });
+}
