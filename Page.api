@@ -1,0 +1,16 @@
+const scripts = new Map();
+
+export default function handler(req, res) {
+  const { hash } = req.query;
+
+  const code = scripts.get(hash);
+
+  if (!code) {
+    return res.status(404).send('Script not found or expired');
+  }
+
+  res.setHeader('Content-Type', 'text/plain');
+  res.send(code);
+}
+
+export { scripts };
